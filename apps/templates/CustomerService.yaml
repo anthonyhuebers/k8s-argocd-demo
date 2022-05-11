@@ -10,7 +10,7 @@ spec:
     namespace: default
   project: default
   source:
-    path: CustomerService
+    path: templates/CustomerService
     repoURL: https://github.com/anthonyhuebers/k8s-argocd-demo.git
     targetRevision: HEAD
   syncPolicy:
