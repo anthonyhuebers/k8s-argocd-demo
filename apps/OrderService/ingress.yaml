@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: case-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /customerservice(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service: 
+            name: customerservice-api
+            port: 
+              number: 80
+      - path: /orderservice(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service: 
+            name: orderservice-api
+            port: 
+              number: 80
