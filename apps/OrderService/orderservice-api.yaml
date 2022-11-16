@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: customerservice-api
+  name: orderservice-api
 spec:
   replicas: 2
   strategy:
@@ -11,17 +11,17 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      service: customerservice
+      service: orderservice
       type: api
   template:
     metadata:
       labels:
-        service: customerservice
+        service: orderservice
         type: api
     spec:
       containers:
-      - name: customerservice-container
-        image: anthonyhuebers/customerservice:v1
+      - name: orderservice-container
+        image: anthonyhuebers/orderservice:v1
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -47,24 +47,30 @@ spec:
         volumeMounts:
         - name: database-credentials
           mountPath: "/app/credentials"
+        - name: agents-configuration
+          mountPath: "/app/configuration"
       volumes:
       - name: database-credentials
         secret:
-          secretName: customerservice-database-credentials
+          secretName: orderservice-database-credentials
           items:
           - key: database.json
             path: database.json
-    
----
+      - name: agents-configuration
+        configMap:
+          name: orderservice-agents-configuration
+
+---  
 
 apiVersion: v1
 kind: Service
 apiVersion: v1
 metadata:
-  name: customerservice-api
+  name: orderservice-api
 spec:
   ports:
     - port: 80
   selector:
-    service: customerservice
+    service: orderservice
     type: api
+   
