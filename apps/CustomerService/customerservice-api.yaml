@@ -1,29 +1,61 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: customerservice-api
-  labels:
-    service: customerservice
-    type: api
 spec:
-  containers:
-  - name: customerservice-container
-    image: anthonyhuebers/customerservice:v1
-    imagePullPolicy: Always
-    ports:
-    - containerPort: 80
-    volumeMounts:
-    - name: database-credentials
-      mountPath: "/app/credentials"
-  volumes:
-  - name: database-credentials
-    secret:
-      secretName: customerservice-database-credentials
-      items:
-      - key: database.json
-        path: database.json
-
----  
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      service: customerservice
+      type: api
+  template:
+    metadata:
+      labels:
+        service: customerservice
+        type: api
+    spec:
+      containers:
+      - name: customerservice-container
+        image: anthonyhuebers/customerservice:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /hc
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /hc
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 3
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: database-credentials
+          mountPath: "/app/credentials"
+      volumes:
+      - name: database-credentials
+        secret:
+          secretName: customerservice-database-credentials
+          items:
+          - key: database.json
+            path: database.json
+    
+---
 
 apiVersion: v1
 kind: Service
