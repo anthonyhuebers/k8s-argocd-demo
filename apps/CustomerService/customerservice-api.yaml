@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: customerservice-api
 spec:
-  replicas: 3
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: customerservice-container
-        image: anthonyhuebers/customerservice:v1
+        image: anthonyhuebers/customerservice:v2
         imagePullPolicy: Always
         ports:
         - containerPort: 80
