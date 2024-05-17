@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: customerservice-container
-        image: anthonyhuebers/customerservice:v2
+        image: anthonyhuebers/customerservice:v1
         imagePullPolicy: Always
         ports:
         - containerPort: 80
