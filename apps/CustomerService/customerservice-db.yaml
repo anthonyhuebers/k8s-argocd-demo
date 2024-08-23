@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customerservice-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: customerservice
+      type: db
+  template:
+    metadata:
+      name: customerservice-db
+      labels:
+        service: customerservice
+        type: db
+    spec:
+      containers:
+      - name: customerservice-database-container
+        image: mysql
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "P@ssw0rd!" 
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: customerservice-database-credentials
+              key: database
+        - name: MYSQL_USER 
+          valueFrom:
+            secretKeyRef:
+              name: customerservice-database-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: customerservice-database-credentials
+              key: password
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: persistentstorage
+      volumes:
+        - name: persistentstorage 
+          persistentVolumeClaim:
+            claimName: customerservice-db
+        
+---    
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: customerservice-db
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+     requests:
+       storage: 2Gi
+       
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: customerservice-db
+spec:
+  ports:
+    - port: 3306
+  selector:
+    service: customerservice
+    type: db
